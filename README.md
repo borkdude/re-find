@@ -63,62 +63,37 @@ $ clj -Aspeculative --args '8' --ret 'number?' -v
 | clojure.core// |         8 |          1/8 |
 ```
 
-A search for functions that accept `{:a 1} :b 1` as arguments and returns a
-`map?`:
+A search for functions that accept two `sets` and return a `set`:
 
 ``` shell
-$ clj -Aspeculative --args '{:a 1} :b 1' --ret 'map?' -v
+$ clj -Aspeculative --args '#{1 2} #{2 3}' --ret 'set?' -v
 
-|           function |   arguments | return value |
-|--------------------+-------------+--------------|
-| clojure.core/assoc | {:a 1} :b 1 | {:a 1, :b 1} |
+|                 function |     arguments | return value |
+|--------------------------+---------------+--------------|
+| clojure.set/intersection | #{1 2} #{2 3} |         #{2} |
+|   clojure.set/difference | #{1 2} #{2 3} |         #{1} |
+|        clojure.set/union | #{1 2} #{2 3} |     #{1 3 2} |
+|       clojure.set/select | #{1 2} #{2 3} |         #{2} |
 ```
 
 Without the `-v` option, only a list of symbols of matching functions is returned:
 
 ``` shell
-$ clj -Aspeculative --args '{:a 1}' --ret 'map?'
-(clojure.core/merge clojure.core/partial)
+$ clj -Aspeculative --args '#{1 2} #{2 3}' --ret 'set?'
+(clojure.set/intersection
+ clojure.set/difference
+ clojure.set/union
+ clojure.set/select)
 ```
 
-Only providing a `--ret` value is also supported but this is slightly less
-useful:
-
-``` shell
-$ clj -Aspeculative --ret '"foo"'
-(clojure.core/remove
- clojure.core/get
- clojure.core/re-groups
- clojure.core/reduce
- clojure.core/first
- clojure.core/subs
- clojure.core/range
- clojure.core/some
- clojure.core/some?
- clojure.core/str
- clojure.core/apply
- clojure.core/filter
- clojure.core/re-matches
- clojure.core/re-find
- clojure.core/reset!
- clojure.core/map
- clojure.core/swap!)
-```
-
-If called with the right arguments, these functions could in theory return a
-string. Function `range` won't ever return a string. The `:ret` of its spec is
-`seqable?`, and since a string is `seqable?` it matches. More information means
-better results. This makes more sense:
-
-``` shell
-$ clj -Aspeculative --args '"foo" 1' --ret 'string?'
-(clojure.core/subs clojure.core/str)
-```
-
-What functions called with `nil` return `nil`?
+What functions called with `nil` return exactly `nil`?
 ``` shell
 $ clj -Aspeculative --args 'nil' --ret 'nil' -e
-(clojure.core/first clojure.core/merge)
+(clojure.set/intersection
+ clojure.core/first
+ clojure.core/merge
+ clojure.set/difference
+ clojure.set/union)
 ```
 
 ## Credits
