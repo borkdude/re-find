@@ -5,7 +5,7 @@ examples.
 
 ## Usage
 
-This utility comes with a programmatic and CLI namespace. For the programmatic
+This utility comes with a programmatic and CLI interface. For the programmatic
 interface see the docstring of `spec-search.core/search`.
 
 ### CLI
@@ -17,26 +17,31 @@ CLI options:
   [["-a" "--args ARGUMENTS" "Arguments"]
    ["-r" "--ret RETVAL" "Return value"]
    ["-e" "--exact-ret-match" "Return value must match on value"]
-   ["-v" "--print-ret-vals" "Filter and print on succesful return values"]
-   ["-h" "--help"]])
+   ["-v" "--print-ret-vals" "Filter and print on succesful return values"]])
 ```
 
 These options are best explained with examples.
 
-Search functions that accepts `8 2` as arguments, returns exactly the number `4`
-and print the return value of the function calls:
+The following examples are possible because of the specs in
+[speculative](https://github.com/slipset/speculative/). They are preloaded using
+the alias. Speculative is not part of this utility. This utility could be used
+with arbitrary other specs that you load in your own code.
+
+So let's search some Clojure core functions.
+
+Which functions accept `inc [1 2 3]` as arguments and return exactly `[2 3 4]`?
 
 ``` shell
-$ clj -Aspeculative --args '8 2' --ret '4' -e -v
+$ clj -Aspeculative --args 'inc [1 2 3]' -r '[2 3 4]' -e -v
 
-|       function | arguments | return value |
-|----------------+-----------+--------------|
-| clojure.core// |       8 2 |            4 |
-
+|         function |   arguments | return value |
+|------------------+-------------+--------------|
+| clojure.core/map | inc [1 2 3] |      (2 3 4) |
 ```
 
-Without the `-e` option, the `:ret` match only has to be valid for the given
-example. Since `4` is `any?`, the `some?` function also matches here:
+Of course, that's map (a spec for `mapv` isn't currently in speculative).
+
+Without the `-e` option the return value doesn't have to match the call with the arguments, but still has to satisfy the `:ret` spec. In the following example, since `4` matches `any?`, both `/` and `some?` match:
 
 ``` shell
 $ clj -Aspeculative --args '8' --ret '4' -v
@@ -47,21 +52,7 @@ $ clj -Aspeculative --args '8' --ret '4' -v
 | clojure.core/some? |         8 |         true |
 ```
 
-Search functions that accept `8 2` as arguments and show whatever they return:
-
-``` shell
-$ clj -Aspeculative --args '8 2'  -v
-
-|           function | arguments | return value |
-|--------------------+-----------+--------------|
-|     clojure.core// |       8 2 |            4 |
-|   clojure.core/get |       8 2 |          nil |
-|     clojure.core/= |       8 2 |        false |
-| clojure.core/range |       8 2 |           () |
-|   clojure.core/str |       8 2 |         "82" |
-```
-
-Another example:
+A search for functions that accept `{:a 1} :a` as arguments and can return anything:
 
 ``` shell
 $ clj -Aspeculative --args '{:a 1} :a' -v
@@ -88,7 +79,8 @@ $ clj -Aspeculative --args '{:a 1} :a'
  clojure.core/fnil)
 ```
 
-Only providing a `--ret` value is also supported:
+Only providing a `--ret` value is also supported but this is slightly less
+useful:
 
 ``` shell
 $ clj -Aspeculative --ret '"foo"'
@@ -120,6 +112,18 @@ better results. This makes more sense:
 $ clj -Aspeculative --args '"foo" 1' --ret '"foo"'
 (clojure.core/get clojure.core/subs clojure.core/str)
 ```
+
+## Credits
+
+Inspiration came from [findfn](https://github.com/Raynes/findfn) which was a
+cool library in the early days of Clojure. Its strategy was brute force and
+just tried to call all core functions.
+
+The idea to use specs to find functions was triggered by an episode of [The
+REPL](https://www.therepl.net/) with [Martin
+Klepsch](https://twitter.com/martinklepsch). They were discussing
+[Hoogle](https://hoogle.haskell.org/) which is a search engine for Haskell that
+finds functions by type signatures. Clojure has specs, so why not use those.
 
 ## License
 
