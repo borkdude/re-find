@@ -58,13 +58,12 @@
                           (try-apply (resolve (:sym sr))
                                      args))))
                search-results)
-          ;; TODO: we probably have to handle ::invalid here
           search-results)]
     (if (and args print-ret-vals)
       (pprint/print-table
        ["function" "arguments" "return value"]
        (keep (fn [{:keys [ret-val] :as m}]
-               (when ret-val
+               (when (not= ::invalid ret-val)
                  (-> m
                      (assoc :args (:args options))
                      (update :ret-val pr-str)
