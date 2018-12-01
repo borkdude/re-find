@@ -39,10 +39,9 @@ $ clj -Aspeculative --args 'inc [1 2 3]' -r '[2 3 4]' -e -v
 | clojure.core/map | inc [1 2 3] |      (2 3 4) |
 ```
 
-Of course, that's map (a spec for `mapv` isn't currently in speculative).
+Of course, that's `map` (a spec for `mapv` isn't currently in speculative).
 
-Without the `-e` option the return value doesn't have to match the call with the
-arguments, but still has to satisfy the `:ret` spec. In the following example,
+Without the `-e` option the return value doesn't only has to satisfy the `:ret` spec and is checked independent from the arguments. In the following example,
 since `4` matches `any?`, both `/` and `some?` match:
 
 ``` shell
@@ -54,8 +53,7 @@ $ clj -Aspeculative --args '8' --ret '4' -v
 | clojure.core/some? |         8 |         true |
 ```
 
-Instead of a normal value, the `--ret` option accepts a predicate that is
-checked in addition to the `:ret` spec, if present:
+In addition to a value the `--ret` option accepts a predicate:
 
 ``` shell
 $ clj -Aspeculative --args '8' --ret 'number?' -v
@@ -65,7 +63,7 @@ $ clj -Aspeculative --args '8' --ret 'number?' -v
 | clojure.core// |         8 |          1/8 |
 ```
 
-A search for functions that accept `{:a 1} :b 1` as arguments and can returns a
+A search for functions that accept `{:a 1} :b 1` as arguments and returns a
 `map?`:
 
 ``` shell
