@@ -1,7 +1,7 @@
 # spec-search
 
-Find functions that have a matching `:args` and (optional) `:ret` spec on given
-examples or predicates.
+Find functions that have a matching `:args` and/or `:ret` spec on given
+examples.
 
 ## Usage
 
@@ -53,7 +53,7 @@ $ clj -Aspeculative --args '8' --ret '4' -v
 | clojure.core/some? |         8 |         true |
 ```
 
-In addition to a value the `--ret` option accepts a predicate:
+In addition to a value, the `--ret` option accepts a predicate:
 
 ``` shell
 $ clj -Aspeculative --args '8' --ret 'number?' -v
