@@ -41,7 +41,9 @@ $ clj -Aspeculative --args 'inc [1 2 3]' -r '[2 3 4]' -e -v
 
 Of course, that's map (a spec for `mapv` isn't currently in speculative).
 
-Without the `-e` option the return value doesn't have to match the call with the arguments, but still has to satisfy the `:ret` spec. In the following example, since `4` matches `any?`, both `/` and `some?` match:
+Without the `-e` option the return value doesn't have to match the call with the
+arguments, but still has to satisfy the `:ret` spec. In the following example,
+since `4` matches `any?`, both `/` and `some?` match:
 
 ``` shell
 $ clj -Aspeculative --args '8' --ret '4' -v
@@ -52,31 +54,33 @@ $ clj -Aspeculative --args '8' --ret '4' -v
 | clojure.core/some? |         8 |         true |
 ```
 
-A search for functions that accept `{:a 1} :a` as arguments and can return anything:
+Instead of a normal value, the `--ret` option accepts a predicate that is
+checked in addition to the `:ret` spec, if present:
 
 ``` shell
-$ clj -Aspeculative --args '{:a 1} :a' -v
+$ clj -Aspeculative --args '8' --ret 'number?' -v
 
-|             function | arguments |                                                                             return value |
-|----------------------+-----------+------------------------------------------------------------------------------------------|
-|     clojure.core/get | {:a 1} :a |                                                                                        1 |
-|       clojure.core/= | {:a 1} :a |                                                                                    false |
-|     clojure.core/str | {:a 1} :a |                                                                               "{:a 1}:a" |
-| clojure.core/partial | {:a 1} :a | #object[clojure.core$partial$fn__5824 0x88a8218 "clojure.core$partial$fn__5824@88a8218"] |
-|    clojure.core/juxt | {:a 1} :a |     #object[clojure.core$juxt$fn__5807 0x4163f1cd "clojure.core$juxt$fn__5807@4163f1cd"] |
-|    clojure.core/fnil | {:a 1} :a |       #object[clojure.core$fnil$fn__6883 0x23aae55 "clojure.core$fnil$fn__6883@23aae55"] |
+|       function | arguments | return value |
+|----------------+-----------+--------------|
+| clojure.core// |         8 |          1/8 |
+```
+
+A search for functions that accept `{:a 1} :b 1` as arguments and can returns a
+`map?`:
+
+``` shell
+$ clj -Aspeculative --args '{:a 1} :b 1' --ret 'map?' -v
+
+|           function |   arguments | return value |
+|--------------------+-------------+--------------|
+| clojure.core/assoc | {:a 1} :b 1 | {:a 1, :b 1} |
 ```
 
 Without the `-v` option, only a list of symbols of matching functions is returned:
 
 ``` shell
-$ clj -Aspeculative --args '{:a 1} :a'
-(clojure.core/get
- clojure.core/=
- clojure.core/str
- clojure.core/partial
- clojure.core/juxt
- clojure.core/fnil)
+$ clj -Aspeculative --args '{:a 1}' --ret 'map?'
+(clojure.core/merge clojure.core/partial)
 ```
 
 Only providing a `--ret` value is also supported but this is slightly less
@@ -109,8 +113,14 @@ string. Function `range` won't ever return a string. The `:ret` of its spec is
 better results. This makes more sense:
 
 ``` shell
-$ clj -Aspeculative --args '"foo" 1' --ret '"foo"'
-(clojure.core/get clojure.core/subs clojure.core/str)
+$ clj -Aspeculative --args '"foo" 1' --ret 'string?'
+(clojure.core/subs clojure.core/str)
+```
+
+What functions called without args return `nil`?
+``` shell
+$ clj -Aspeculative --ret 'nil?'
+(clojure.core/merge)
 ```
 
 ## Credits
