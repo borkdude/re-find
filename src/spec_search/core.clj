@@ -40,12 +40,11 @@
   "Search spec that matches args and/or ret opt.
    Argument opts can have:
     :args - value to search matching args spec
-    :ret - value to search matching ret spec. if fn? behaves as
-      additional check to ret spec.
-    :exact-ret-match? - if true, the call with args must be equal to ret
-
-   At minimum args or ret must be specified. When one is missing,
-   corresponding spec always matches."
+    :ret - value to search matching ret spec. if passed a fn? then it
+     will replace the ret spec. If :exact-ret-match? is also true, then
+     return value must exactly match the function.
+    :exact-ret-match? - if true, return value must be equal to :ret
+   At minimum args or ret must be specified."
   [opts]
   (let [args (find opts :args)
         ret (find opts :ret)
