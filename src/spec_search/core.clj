@@ -12,31 +12,36 @@
                                (s/valid? args-spec
                                          (second args))))
           ret-val (second ret)
-          ret-fn? (ifn? ret-val)
+          ret-fn? (fn? ret-val)
           ret-spec-match? (or (not ret)
                               ret-fn?
                               (and ret ret-spec
                                    (s/valid? ret-spec ret-val)))
-          ret-val-match? (if (or ret-fn?
-                                 exact-ret-match?)
-                           (let [ret-val*
-                                 (try (apply (resolve sym) (second args))
-                                      (catch Exception _ false))]
-                             (if exact-ret-match?
-                               (try (= ret-val ret-val*)
-                                    (catch Exception _ false))
-                               (ret-val ret-val*)))
-                           true)]
+          ret-val-match (if (or ret-fn?
+                                exact-ret-match?)
+                          (let [ret-val*
+                                (try (apply (resolve sym) (second args))
+                                     (catch Exception _ ::invalid))]
+                            (cond exact-ret-match?
+                                  (if (try (= ret-val ret-val*)
+                                           (catch Exception _ ::invalid))
+                                    {:ret-val ret-val*}
+                                    ::invalid)
+                                  (ret-val ret-val*) {:ret-val ret-val*}
+                                  :else ::invalid))
+                          {})]
       (when (and args-match?
                  ret-spec-match?
-                 ret-val-match?)
-        sym))))
+                 (not= ::invalid ret-val-match))
+        (cond-> (merge {:sym sym} ret-val-match)
+          args (assoc :args (second args)))))))
 
 (defn search
   "Search spec that matches args and/or ret opt.
    Argument opts can have:
     :args - value to search matching args spec
-    :ret  - value to search matching ret spec
+    :ret - value to search matching ret spec. if fn? behaves as
+      additional check to ret spec.
     :exact-ret-match? - if true, the call with args must be equal to ret
 
    At minimum args or ret must be specified. When one is missing,

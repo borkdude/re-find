@@ -117,7 +117,7 @@ $ clj -Aspeculative --args '"foo" 1' --ret 'string?'
 
 What functions called without args return `nil`?
 ``` shell
-$ clj -Aspeculative --ret 'nil?'
+$ clj -Aspeculative --ret 'nil' -e
 (clojure.core/merge)
 ```
 
