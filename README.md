@@ -1,7 +1,7 @@
 # spec-search
 
 Find functions that have a matching `:args` and/or `:ret` spec on given
-examples.
+examples or predicates.
 
 ## Usage
 
