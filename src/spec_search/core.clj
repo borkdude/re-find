@@ -63,9 +63,9 @@
         eval? (or (:exact-ret-match? opts)
                   (fn? (second ret)))
         _ (assert (if eval? (not safe?) true)
-                  "exact-ret-match? or ret is fn? but safe? is set to true")
+                  "exact-ret-match? is true or ret is fn? but safe? is set to true")
         _ (assert (if eval? args true)
-                  "exact-ret-match? or ret is fn? but no args are given")
+                  "exact-ret-match? is true or ret is fn? but no args are given")
         syms (stest/instrumentable-syms)
         specs (map
                s/get-spec (stest/instrumentable-syms)) sym*spec (zipmap syms specs)]

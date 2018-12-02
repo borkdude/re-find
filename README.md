@@ -102,7 +102,7 @@ evaluate with the given arguments.
 
 ``` shell
 $ clj -Aspeculative --args 'nil' --ret 'nil' -e --safe
-Assert failed: exact-ret-match? or ret is fn? but safe? is set to true
+Assert failed: exact-ret-match? is true or ret is fn? but safe? is set to true
 ```
 
 ## Credits
