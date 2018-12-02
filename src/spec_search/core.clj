@@ -23,7 +23,7 @@
                             ret-fn?
                             (and ret ret-spec
                                  (s/valid? ret-spec ret-expected)))
-        ret-val (when-not (:no-eval? opts)
+        ret-val (when-not (:safe? opts)
                   (try-apply sym (second args)))
         ret-val-match (if (or ret-fn?
                               exact-ret-match?)
@@ -50,20 +50,20 @@
     :ret - value to search matching ret spec. if passed a fn? then it
      will replace the ret spec. If :exact-ret-match? is also true, then
      return value must exactly match the function.
-    :no-eval? - forbid evaluation of found function with args. useful for side effecting functions
+    :safe? - forbid evaluation of found function with args. useful for side effecting functions
     :exact-ret-match? - if true, return value must be equal to :ret
    At minimum args or ret must be specified."
   [& {:as opts}]
   (let [args (find opts :args)
         ret (find opts :ret)
         _ (assert (or args ret) "At minimum provide args or ret")
-        no-eval? (:no-eval? opts)
+        safe? (:safe? opts)
         _ (when (:exact-ret-match? opts)
             (assert ret "exact-ret-match? true but no ret passed"))
         eval? (or (:exact-ret-match? opts)
                   (fn? (second ret)))
-        _ (assert (if eval? (not no-eval?) true)
-                  "exact-ret-match? or ret is fn? but no-eval? is set to true")
+        _ (assert (if eval? (not safe?) true)
+                  "exact-ret-match? or ret is fn? but safe? is set to true")
         _ (assert (if eval? args true)
                   "exact-ret-match? or ret is fn? but no args are given")
         syms (stest/instrumentable-syms)
@@ -86,8 +86,8 @@
 
   (search :args [] :ret nil :exact-ret-match? true) ;; merge
   (search :exact-ret-match? true :args []) ;; exception
-  (search :no-eval? true :exact-ret-match? true :ret nil :args []) ;; exception
+  (search :safe? true :exact-ret-match? true :ret nil :args []) ;; exception
   (search :args [8] :ret number?)
-  (search :args [8] :ret number? :no-eval? true) ;; exception
+  (search :args [8] :ret number? :safe? true) ;; exception
 
   )

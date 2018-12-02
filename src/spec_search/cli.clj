@@ -37,9 +37,9 @@
         ret (when-let [[_ v] (find options :ret)]
               [:ret (read-ret v)])
         exact-ret-match? (:exact-ret-match options)
-        no-eval? (:safe options)
+        safe? (:safe options)
         search-opts (cond-> {:exact-ret-match? exact-ret-match?
-                             :no-eval? no-eval?}
+                             :safe? safe?}
                       args (assoc :args args)
                       ret (assoc :ret (second ret))
                       ret-vals (assoc :ret-vals? (second ret-vals)))
