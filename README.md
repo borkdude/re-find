@@ -14,10 +14,11 @@ CLI options:
 
 ``` clojure
 (def cli-options
-  [["-a" "--args ARGUMENTS" "Arguments"]
-   ["-r" "--ret RETVAL" "Return value"]
-   ["-e" "--exact-ret-match" "Return value must match on value"]
-   ["-v" "--print-ret-vals" "Filter and print on succesful return values"]])
+  [["-a" "--args ARGUMENTS" "arguments"]
+   ["-r" "--ret RETVAL" "return value"]
+   ["-e" "--exact-ret-match" "return value must match on value"]
+   ["-s" "--safe" "safe: no eval will happen on arguments"]
+   ["-v" "--verbose" "prints table with return values"]])
 ```
 
 These options are best explained with examples.
@@ -94,6 +95,14 @@ $ clj -Aspeculative --args 'nil' --ret 'nil' -e
  clojure.core/merge
  clojure.set/difference
  clojure.set/union)
+```
+
+For safety, there is a `--safe` option that will prevent found functions to
+evaluate with the given arguments.
+
+``` shell
+$ clj -Aspeculative --args 'nil' --ret 'nil' -e --safe
+Assert failed: exact-ret-match? or ret is fn? but no-eval? is set to true
 ```
 
 ## Credits

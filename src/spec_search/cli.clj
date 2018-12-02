@@ -22,44 +22,29 @@
     (try-resolve
      (edn/read-string s))))
 
-(defn try-apply [f args]
-  {:ret-val (try (apply f args)
-                 (catch Exception _ ::invalid))})
-
 (def cli-options
-  [["-a" "--args ARGUMENTS" "Arguments"]
-   ["-r" "--ret RETVAL" "Return value"]
-   ["-e" "--exact-ret-match" "Return value must match on value"]
-   ["-v" "--print-ret-vals" "Filter and print on succesful return values"]
-   ["-h" "--help"]])
+  [["-a" "--args ARGUMENTS" "arguments"]
+   ["-r" "--ret RETVAL" "return value"]
+   ["-e" "--exact-ret-match" "return value must match on value"]
+   ["-s" "--safe" "safe: no eval will happen on arguments"]
+   ["-v" "--verbose" "prints table with return values"]])
 
 (defn -main [& args]
   (let [options (:options (parse-opts args cli-options))
         args (when-let [[_ v] (find options :args)]
                (read-args v))
-        print-ret-vals (:print-ret-vals options)
-        _ (assert (if print-ret-vals args true)
-                  "--print-ret-vals needs --args")
+        ret-vals (find options :ret-vals)
         ret (when-let [[_ v] (find options :ret)]
               [:ret (read-ret v)])
         exact-ret-match? (:exact-ret-match options)
-        _ (assert (if exact-ret-match? ret true)
-                  "--exact-ret-match needs --ret")
-        search-opts (cond-> {:exact-ret-match? exact-ret-match?}
+        no-eval? (:safe options)
+        search-opts (cond-> {:exact-ret-match? exact-ret-match?
+                             :no-eval? no-eval?}
                       args (assoc :args args)
-                      ret (assoc :ret (second ret)))
-        search-results (search/search search-opts)
-        search-results
-        (if (and args print-ret-vals)
-          (map (fn [sr]
-                 (if (:ret-val sr)
-                   sr
-                   (merge sr
-                          (try-apply (resolve (:sym sr))
-                                     args))))
-               search-results)
-          search-results)]
-    (if (and args print-ret-vals)
+                      ret (assoc :ret (second ret))
+                      ret-vals (assoc :ret-vals? (second ret-vals)))
+        search-results (apply search/search (mapcat identity search-opts))]
+    (if (:verbose options)
       (pprint/print-table
        ["function" "arguments" "return value"]
        (keep (fn [{:keys [ret-val] :as m}]
@@ -78,5 +63,16 @@
 
   (-main "--args" "inc [1 2 3]" "--ret" "[]" "-e") ;; remove
   (-main "--args" "inc [1 2 3]" "--ret" "[2 3 4]" "-e") ;; map
+  (-main "--args" "nil" "--ret" "nil" "-e") ;; first, merge
+
+  (-main "--args" "inc [1 2 3]" "--ret" "[2 3 4]" "-e" "-v")
+  (require '[speculative.core.extra])
+  (require '[speculative.instrument])
+  (-main "--args" "8" "--ret" "4" "-v")
+  (-main "--args" "8" "--ret" "number?" "-v")
+  (-main "--args" "#{1 2} #{2 3}" "--ret" "set?" "-v")
+  (-main "--args" "#{1 2} #{2 3}" "--ret" "set?")
+  (-main "--args" "nil" "--ret" "nil" "-e")
+  (-main "--args" "8" "--ret" "number?" "--safe") ;; exception
 
   )
