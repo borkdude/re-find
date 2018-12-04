@@ -1,32 +1,21 @@
 (ns re-find.cli
   (:require
-   [clojure.edn :as edn]
    [clojure.pprint :as pprint]
    [clojure.tools.cli :refer [parse-opts]]
    [re-find.core :refer [match]]
    [clojure.set :as set]))
 
-(defn try-resolve [s]
-  (if (and (symbol? s)
-           (not (re-find #"^['`]" (str s))))
-    (deref (resolve s))
-    s))
-
 (defn read-args [s]
-  (when s
-    (mapv try-resolve
-          (edn/read-string (format "[%s]" s)))))
+  (eval (read-string (format "[%s]" s))))
 
 (defn read-ret [s]
-  (when s
-    (try-resolve
-     (edn/read-string s))))
+  (eval (read-string s)))
 
 (def cli-options
   [["-a" "--args ARGUMENTS" "arguments"]
    ["-r" "--ret RETVAL" "return value"]
    ["-e" "--exact-ret-match" "return value must match on value"]
-   ["-s" "--safe" "safe: no eval will happen on arguments"]
+   ["-s" "--safe" "safe: no evaluation of functions on given arguments"]
    ["-v" "--verbose" "prints table with return values"]])
 
 (defn -main [& args]

@@ -2,11 +2,16 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as stest]))
 
-(defn- try-apply [sym args]
-  (try {:ret-val (apply (resolve sym) args)}
-       ;; force result here?
-       (catch Exception _
-         ::invalid)))
+(defn- try-apply [f args]
+  (try
+    (let [ret-val (apply f args)]
+      ;; use pr-str to force lazy seq
+      ;; example where this is needed: (match :args [#"a(.*)" "abc"] :ret seq)
+      (binding [*print-length* 1]
+        (pr-str ret-val))
+      ret-val)
+    (catch Exception _
+      ::invalid)))
 
 (defn- match-1
   [[sym spec] args ret opts]
@@ -24,23 +29,24 @@
                             (and ret ret-spec
                                  (s/valid? ret-spec ret-expected)))
         ret-val (when-not (:safe? opts)
-                  (try-apply sym (second args)))
+                  (try-apply (resolve sym) (second args)))
         ret-val-match (if (or ret-fn?
                               exact-ret-match?)
                         (cond
                           exact-ret-match?
-                          (if (try (= ret-expected (:ret-val ret-val))
+                          (if (try (= ret-expected ret-val)
                                    (catch Exception _ ::invalid))
                             ret-val
                             ::invalid)
-                          (ret-expected (:ret-val ret-val)) ret-val
+                          ;; this evaluates to a truthy value
+                          (try-apply ret-expected [ret-val]) ret-val
                           :else ::invalid)
                         {})]
     (when (and args-match?
                ret-spec-match?
                (not= ::invalid ret-val)
                (not= ::invalid ret-val-match))
-      (cond-> (merge {:sym sym} ret-val)
+      (cond-> (merge {:sym sym} {:ret-val ret-val})
         args (assoc :args (second args))))))
 
 (defn match
@@ -75,7 +81,7 @@
 
 (comment
 
-  (require '[speculative.core])
+  (require '[speculative.instrument])
   (match :args [inc [1 2 3]] :ret [2 3 4])
   (match :args [inc [1 2 3]] :ret [2 3 4] :exact-ret-match? true)
 
@@ -91,5 +97,7 @@
   (require '[speculative.core.extra])
   (match :args [8] :ret number?)
   (match :args [8] :ret number? :safe? true) ;; exception
+
+  (match :args [#"b" "abc"] :ret "b" :exact-ret-match? true)
 
   )

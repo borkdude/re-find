@@ -97,6 +97,16 @@ $ clj -Aspeculative --args 'nil' --ret 'nil' -e
  clojure.set/union)
 ```
 
+With what options can we find the beautiful function named `re-find`?
+
+``` shell
+$ clj -A:speculative --args '#"b" "abc"' --ret '"b"' -e -v
+
+|             function |  arguments | return value |
+|----------------------+------------+--------------|
+| clojure.core/re-find | #"b" "abc" |          "b" |
+```
+
 For safety, there is a `--safe` option that will prevent found functions to
 evaluate with the given arguments.
 
@@ -104,6 +114,12 @@ evaluate with the given arguments.
 $ clj -Aspeculative --args 'nil' --ret 'nil' -e --safe
 Assert failed: exact-ret-match? is true or ret is fn? but safe? is set to true
 ```
+
+## Name
+
+Often you know there's a function for it, but you forgot the name. `re-find` can
+help you re-find it. The name for this library was inspired by the awesome
+`re-find` function in Clojure.
 
 ## Credits
 
