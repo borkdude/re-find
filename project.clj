@@ -12,6 +12,6 @@
                     [org.clojure/test.check "0.9.0"]
                     [speculative "0.0.3-SNAPSHOT"]]}}
   :deploy-repositories [["clojars" {:url "https://clojars.org/repo"
-                                    :username :env/clojars_username
-                                    :password :env/clojars_password
+                                    :username :env/clojars_user
+                                    :password :env/clojars_pass
                                     :sign-releases false}]])
