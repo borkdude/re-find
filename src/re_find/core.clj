@@ -1,14 +1,14 @@
-(ns spec-search.core
+(ns re-find.core
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as stest]))
 
-(defn try-apply [sym args]
+(defn- try-apply [sym args]
   (try {:ret-val (apply (resolve sym) args)}
        ;; force result here?
        (catch Exception _
          ::invalid)))
 
-(defn search*
+(defn- match-1
   [[sym spec] args ret opts]
   (let [args-spec (:args spec)
         ret-spec (:ret spec)
@@ -43,8 +43,8 @@
       (cond-> (merge {:sym sym} ret-val)
         args (assoc :args (second args))))))
 
-(defn search
-  "Search spec that matches args and/or ret opt.
+(defn match
+  "Find functions by specs that match args and/or ret opt.
    Argument opts can have:
     :args - value to search matching args spec
     :ret - value to search matching ret spec. if passed a fn? then it
@@ -69,25 +69,27 @@
         syms (stest/instrumentable-syms)
         specs (map
                s/get-spec (stest/instrumentable-syms)) sym*spec (zipmap syms specs)]
-    (keep #(search* % args ret opts) sym*spec)))
+    (keep #(match-1 % args ret opts) sym*spec)))
 
 ;;;; Scratch
 
 (comment
 
   (require '[speculative.core])
-  (search :args [inc [1 2 3]] :ret [2 3 4])
-  (search :args [inc [1 2 3]] :ret [2 3 4] :exact-ret-match? true)
+  (match :args [inc [1 2 3]] :ret [2 3 4])
+  (match :args [inc [1 2 3]] :ret [2 3 4] :exact-ret-match? true)
 
   (require '[clojure.pprint :as pprint])
   (pprint/print-table
    (map #(update % :ret-val pr-str)
-        (search :args [inc [1 2 3]] :ret [2 3 4])))
+        (match :args [inc [1 2 3]] :ret [2 3 4])))
 
-  (search :args [] :ret nil :exact-ret-match? true) ;; merge
-  (search :exact-ret-match? true :args []) ;; exception
-  (search :safe? true :exact-ret-match? true :ret nil :args []) ;; exception
-  (search :args [8] :ret number?)
-  (search :args [8] :ret number? :safe? true) ;; exception
+  (match :args [] :ret nil :exact-ret-match? true) ;; merge
+  (match :exact-ret-match? true :args []) ;; exception
+  (match :safe? true :exact-ret-match? true :ret nil :args []) ;; exception
+
+  (require '[speculative.core.extra])
+  (match :args [8] :ret number?)
+  (match :args [8] :ret number? :safe? true) ;; exception
 
   )

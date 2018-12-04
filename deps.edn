@@ -4,4 +4,4 @@
             :main-opts ["-e" "(require,'[patch.clj-2443])"
                         "-e" "(require,'[speculative.instrument,:refer,[instrument]])"
                         "-e" "(require,'[speculative.core.extra])"
-                        "-m" "spec-search.cli"]}}}
+                        "-m" "re-find.cli"]}}}

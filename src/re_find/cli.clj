@@ -1,9 +1,9 @@
-(ns spec-search.cli
+(ns re-find.cli
   (:require
    [clojure.edn :as edn]
    [clojure.pprint :as pprint]
    [clojure.tools.cli :refer [parse-opts]]
-   [spec-search.core :as search]
+   [re-find.core :refer [match]]
    [clojure.set :as set]))
 
 (defn try-resolve [s]
@@ -43,7 +43,7 @@
                       args (assoc :args args)
                       ret (assoc :ret (second ret))
                       ret-vals (assoc :ret-vals? (second ret-vals)))
-        search-results (apply search/search (mapcat identity search-opts))]
+        search-results (apply match (mapcat identity search-opts))]
     (if (:verbose options)
       (pprint/print-table
        ["function" "arguments" "return value"]
@@ -61,13 +61,12 @@
 
 (comment
 
-  (-main "--args" "inc [1 2 3]" "--ret" "[]" "-e") ;; remove
-  (-main "--args" "inc [1 2 3]" "--ret" "[2 3 4]" "-e") ;; map
-  (-main "--args" "nil" "--ret" "nil" "-e") ;; first, merge
-
-  (-main "--args" "inc [1 2 3]" "--ret" "[2 3 4]" "-e" "-v")
   (require '[speculative.core.extra])
   (require '[speculative.instrument])
+  (-main "--args" "inc [1 2 3]" "--ret" "[]" "-e") ;; remove
+  (-main "--args" "inc [1 2 3]" "--ret" "[2 3 4]" "-e" "-v") ;; map
+  (-main "--args" "nil" "--ret" "nil" "-e") ;; first, merge
+  (-main "--args" "inc [1 2 3]" "--ret" "[2 3 4]" "-e" "-v")
   (-main "--args" "8" "--ret" "4" "-v")
   (-main "--args" "8" "--ret" "number?" "-v")
   (-main "--args" "#{1 2} #{2 3}" "--ret" "set?" "-v")

@@ -1,4 +1,4 @@
-# spec-search
+# re-find
 
 Find functions that have a matching `:args` and/or `:ret` spec on given
 examples.
@@ -6,7 +6,7 @@ examples.
 ## Usage
 
 This utility comes with a programmatic and CLI interface. For the programmatic
-interface see the docstring of `spec-search.core/search`.
+interface see the docstring of `re-find.core/match`.
 
 ### CLI
 
