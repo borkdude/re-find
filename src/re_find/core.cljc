@@ -53,12 +53,15 @@
         ret-fn? (fn? ret-expected)
         args-match? (or (not args)
                         (and args args-spec
-                             (s/valid? args-spec
-                                       (second args))))
+                             (let [res (try! (s/valid? args-spec
+                                                       (second args)))]
+                               (when (not= ::invalid res)
+                                 res))))
         ret-spec-match? (or (not ret)
                             ret-fn?
-                            (and ret ret-spec
-                                 (s/valid? ret-spec ret-expected)))
+                            (let [res (try! (s/valid? ret-spec ret-expected))]
+                              (when (not= ::invalid res)
+                                res)))
         ret-val (when-not (:safe? opts)
                   (try! (apply (sym->fn sym) (second args))))
         ret-val-match (if (or ret-fn?

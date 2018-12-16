@@ -40,7 +40,8 @@
                (when (not= ::invalid ret-val)
                  (-> m
                      (assoc :args (:args options))
-                     (update :ret-val pr-str)
+                     (update :ret-val #(binding [*print-length* 10]
+                                         (pr-str %)))
                      (set/rename-keys
                       {:sym "function"
                        :args "arguments"
