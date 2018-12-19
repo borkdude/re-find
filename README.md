@@ -7,7 +7,7 @@ examples.
 
 This utility comes with a programmatic and CLI interface. For the programmatic
 interface see the docstring of `re-find.core/match`.
-The web version is hosted at [https://re-find.michielborkent.nl](https://re-find.michielborkent.nl).
+The web version is hosted at [re-find.it](https://re-find.it).
 
 ### CLI
 
