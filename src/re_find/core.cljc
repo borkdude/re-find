@@ -62,7 +62,9 @@
                             (let [res (try! (s/valid? ret-spec ret-expected))]
                               (when (not= ::invalid res)
                                 res)))
-        ret-val (when-not (:safe? opts)
+        ret-val (when (and (not (:safe? opts))
+                           args
+                           args-match?)
                   (try! (apply (sym->fn sym) (second args))))
         ret-val-match (if (or ret-fn?
                               exact-ret-match?)
