@@ -108,8 +108,8 @@
         _ (assert (if eval? args true)
                   "exact-ret-match? is true or ret is fn? but no args are given")
         syms (stest/instrumentable-syms)
-        specs (map
-               s/get-spec (stest/instrumentable-syms)) sym*spec (zipmap syms specs)]
+        specs (map s/get-spec syms)
+        sym*spec (zipmap syms specs)]
     (keep #(match-1 % args ret opts) sym*spec)))
 
 ;;;; Scratch
