@@ -5,7 +5,7 @@
         :url "https://github.com/borkdude/re-find"}
   :license {:name "MIT"
             :url "https://mit-license.org/"}
-  :dependencies [[org.clojure/clojure "1.10.0-RC3"]
+  :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/tools.cli "0.4.1"]]
   :profiles {:dev {:dependencies
                    [[org.clojure/clojurescript "1.10.439"]

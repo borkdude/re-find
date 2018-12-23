@@ -1,7 +1,13 @@
 {:deps {org.clojure/tools.cli {:mvn/version "0.4.1"}}
- :aliases {:speculative
+ :aliases {:test {:extra-deps {speculative {:mvn/version "0.0.3-SNAPSHOT"}
+                               org.clojure/clojurescript {:mvn/version "1.10.439"}
+                               org.clojure/test.check {:mvn/version "RELEASE"}}
+                  :extra-paths ["test"]
+                  :main-opts ["-e" "(require,'[speculative.instrument,:refer,[instrument]])"]}
+           :test-clj  {:main-opts ["-m" "re-find.test-runner"]}
+           :test-cljs {:main-opts ["-m" "cljs.main" "-t" "node" "-c" "re-find.test-runner" "-d" "-out"]}
+           :speculative
            {:extra-deps {speculative {:mvn/version "0.0.3-SNAPSHOT"}}
             :main-opts ["-e" "(require,'[patch.clj-2443])"
                         "-e" "(require,'[speculative.instrument,:refer,[instrument]])"
-                        "-e" "(require,'[speculative.core.extra])"
                         "-m" "re-find.cli"]}}}
