@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set $exit_code=0
+
+echo "=== Running clj tests"
+clojure -A:test:test-clj
+if [ $? != 0 ]; then
+    exit_code=1
+fi
+
+echo -e "\n=== Running cljs tests"
+rm -rf out
+clojure -A:test:test-cljs
+if [ $? != 0 ]; then
+    exit_code=1
+fi
+
+node out/main.js
+if [ $? != 0 ]; then
+    exit_code=1
+fi
+
+exit $exit_code
