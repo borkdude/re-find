@@ -1,4 +1,6 @@
 # re-find
+[![CircleCI](https://circleci.com/gh/borkdude/re-find/tree/master.svg?style=svg)](https://circleci.com/gh/borkdude/re-find/tree/master)
+[![Clojars Project](https://img.shields.io/clojars/v/re-find.svg)](https://clojars.org/re-find)
 
 Find functions that have a matching `:args` and/or `:ret` spec on given
 examples.
