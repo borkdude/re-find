@@ -17,6 +17,8 @@
    At minimum args or ret must be specified."
   [& {:as opts}]
   (let [args (find opts :args)
+        printable-args (or (:printable-args opts)
+                           (map pr-str (second args)))
         ret (find opts :ret)
         _ (assert (or args ret) "At minimum provide args or ret")
         safe? (:safe? opts)
@@ -31,7 +33,7 @@
         syms (stest/instrumentable-syms)
         specs (map s/get-spec syms)
         sym*spec (zipmap syms specs)]
-    (keep #(impl/match-1 % args ret opts) sym*spec)))
+    (filter identity (mapcat #(impl/match % args printable-args ret opts) sym*spec))))
 
 ;;;; Scratch
 
