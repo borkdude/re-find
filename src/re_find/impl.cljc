@@ -44,6 +44,14 @@
        (gobject/get (js/eval ns) nm))
      :clj (resolve sym)))
 
+(defn permutations [s]
+  (lazy-seq
+   (if (seq (rest s))
+     (apply concat
+            (for [x s]
+              (map #(cons x %) (permutations (remove #{x} s)))))
+     [s])))
+
 (defn match-1
   [[sym spec] args ret opts]
   (let [args-spec (:args spec)
@@ -81,5 +89,19 @@
                ret-spec-match?
                (not= ::invalid ret-val)
                (not= ::invalid ret-val-match))
-      (cond-> (merge {:sym sym} {:ret-val ret-val})
-        args (assoc :args (second args))))))
+      (merge opts {:sym sym
+                   :args-spec args-spec
+                   :ret-spec ret-spec}
+             (when args {:ret-val ret-val})))))
+
+(defn match [sym+spec args printable-args ret opts]
+  (if-not args
+    [(match-1 sym+spec args ret opts)]
+    (let [permutations? (:permutations? opts)
+          args-permutations (if permutations? (permutations (second args)) [(second args)])
+          printable-args-permutations (if permutations? (permutations printable-args) [printable-args])]
+      (map #(match-1 sym+spec [:args %1] ret (assoc opts
+                                                    :printable-args %2
+                                                    :permutation? %3))
+           args-permutations printable-args-permutations
+           (cons false (repeat true))))))
