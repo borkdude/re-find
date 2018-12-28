@@ -140,4 +140,4 @@ finds functions by type signatures. Clojure has specs, so why not use those.
 
 Copyright © 2018 Michiel Borkent
 
-Distributed under the MIT License. See LICENSE.
+Distributed under the EPL License, same as Clojure. See LICENSE.
