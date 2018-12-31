@@ -1,5 +1,6 @@
 (ns ^:no-doc re-find.impl
   (:require
+   [clojure.math.combinatorics :refer [permutations]]
    #?(:clj [clojure.spec.alpha :as s]
       :cljs [cljs.spec.alpha :as s])
    #?(:cljs [goog.object :as gobject]))
@@ -43,14 +44,6 @@
            nm (munge (name sym))]
        (gobject/get (js/eval ns) nm))
      :clj (resolve sym)))
-
-(defn permutations [s]
-  (lazy-seq
-   (if (seq (rest s))
-     (apply concat
-            (for [x s]
-              (map #(cons x %) (permutations (remove #{x} s)))))
-     [s])))
 
 (defn match-1
   [[sym spec] args ret opts]
