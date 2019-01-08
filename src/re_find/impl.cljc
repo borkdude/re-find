@@ -1,6 +1,7 @@
 (ns ^:no-doc re-find.impl
   (:require
    [clojure.math.combinatorics :refer [permutations]]
+   [re-find.finitize :refer [finitize]]
    #?(:clj [clojure.spec.alpha :as s]
       :cljs [cljs.spec.alpha :as s])
    #?(:cljs [goog.object :as gobject]))
@@ -47,7 +48,8 @@
 
 (defn match-1
   [[sym spec] args ret opts]
-  (let [args-spec (:args spec)
+  (let [finitize? (:finitize? opts)
+        args-spec (:args spec)
         ret-spec (:ret spec)
         exact-ret-match? (:exact-ret-match? opts)
         ret-expected (second ret)
@@ -66,7 +68,8 @@
         ret-val (when (and (not (:safe? opts))
                            args
                            args-match?)
-                  (try! (apply (sym->fn sym) (second args))))
+                  (try! (let [r (apply (sym->fn sym) (second args))]
+                          (if finitize? (finitize r) r))))
         ret-val-match (if (or ret-fn?
                               exact-ret-match?)
                         (cond
@@ -87,14 +90,19 @@
                    :ret-spec ret-spec}
              (when args {:ret-val ret-val})))))
 
-(defn match [sym+spec args printable-args ret opts]
+(defn match [sym+spec args ret opts]
   (if-not args
     [(match-1 sym+spec args ret opts)]
-    (let [permutations? (:permutations? opts)
+    (let [args [:args (if (:finitize? opts)
+                        (mapv finitize (second args))
+                        (second args))]
+          printable-args (or (:printable-args opts)
+                             (mapv pr-str (second args)))
+          permutations? (:permutations? opts)
           args-permutations (if permutations? (permutations (second args)) [(second args)])
           printable-args-permutations (if permutations? (permutations printable-args) [printable-args])]
       (map #(match-1 sym+spec [:args %1] ret (assoc opts
-                                                    :printable-args %2
-                                                    :permutation? %3))
+                                            :printable-args %2
+                                            :permutation? %3))
            args-permutations printable-args-permutations
            (cons false (repeat true))))))
