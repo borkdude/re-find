@@ -3,6 +3,7 @@
    #?(:clj [clojure.spec.alpha :as s]
       :cljs [cljs.spec.alpha :as s])
    [clojure.spec.test.alpha :as stest]
+   [re-find.finitize :refer [finitize]]
    [re-find.impl :as impl]))
 
 (defn match
@@ -16,9 +17,8 @@
     :exact-ret-match? - if true, return value must be equal to :ret
    At minimum args or ret must be specified."
   [& {:as opts}]
-  (let [args (find opts :args)
-        printable-args (or (:printable-args opts)
-                           (map pr-str (second args)))
+  (let [finitize? (:finitize? opts)
+        args (find opts :args)
         ret (find opts :ret)
         _ (assert (or args ret) "At minimum provide args or ret")
         safe? (:safe? opts)
@@ -33,7 +33,7 @@
         syms (stest/instrumentable-syms)
         specs (map s/get-spec syms)
         sym*spec (zipmap syms specs)]
-    (filter identity (mapcat #(impl/match % args printable-args ret opts) sym*spec))))
+    (filter identity (mapcat #(impl/match % args ret opts) sym*spec))))
 
 ;;;; Scratch
 
