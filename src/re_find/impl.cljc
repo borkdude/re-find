@@ -29,12 +29,7 @@
 
   (defmacro try! [expr]
     `(try
-       (let [ret-val# ~expr]
-         ;; use pr-str to force lazy seq
-         ;; example where this is needed: (match :args [#"a(.*)" "abc"] :ret seq)
-         (binding [*print-length* 1]
-           (pr-str ret-val#))
-         ret-val#)
+       ~expr
        (catch ~(? :clj 'Exception :cljs ':default) _#
          ::invalid))))
 
@@ -77,8 +72,12 @@
                           (if (try! (= ret-expected ret-val))
                             ret-val
                             ::invalid)
-                          ;; this evaluates to a truthy value
-                          (try! (ret-expected ret-val)) ret-val
+                          ret-fn? (let [r (try! (ret-expected ret-val))]
+                                    ;; this should evaluate to true and
+                                    ;; not ::invalid
+                                    (if (and r (not= ::invalid r))
+                                      {}
+                                      ::invalid))
                           :else ::invalid)
                         {})]
     (when (and args-match?
