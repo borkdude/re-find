@@ -15,10 +15,12 @@
      return value must exactly match the function.
     :safe? - forbid evaluation of found function with args. useful for side effecting functions
     :exact-ret-match? - if true, return value must be equal to :ret
+    :permutations? - try with permutations of args
+    :finitize? - prevent evaluation of infinite collections
+    :sequential? - if ret is a sequential, skip the ret-spec and check if return value is equal
    At minimum args or ret must be specified."
   [& {:as opts}]
-  (let [finitize? (:finitize? opts)
-        args (find opts :args)
+  (let [args (find opts :args)
         ret (find opts :ret)
         _ (assert (or args ret) "At minimum provide args or ret")
         safe? (:safe? opts)
