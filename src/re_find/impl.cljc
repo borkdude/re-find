@@ -47,7 +47,15 @@
         args-spec (:args spec)
         ret-spec (:ret spec)
         exact-ret-match? (:exact-ret-match? opts)
-        ret-expected (second ret)
+        ret-expected (when ret
+                       (let [v (second ret)
+                             v (if finitize? (finitize v)
+                                   v)
+                             v (if (and (:sequential? opts)
+                                        (sequential? v))
+                                 #(= v %)
+                                 v)]
+                         v))
         ret-fn? (fn? ret-expected)
         args-match? (or (not args)
                         (and args args-spec
@@ -70,16 +78,16 @@
                         (cond
                           exact-ret-match?
                           (if (try! (= ret-expected ret-val))
-                            ret-val
+                            true
                             ::invalid)
                           ret-fn? (let [r (try! (ret-expected ret-val))]
                                     ;; this should evaluate to true and
                                     ;; not ::invalid
                                     (if (and r (not= ::invalid r))
-                                      {}
+                                      true
                                       ::invalid))
                           :else ::invalid)
-                        {})]
+                        true)]
     (when (and args-match?
                ret-spec-match?
                (not= ::invalid ret-val)
@@ -87,7 +95,9 @@
       (merge opts {:sym sym
                    :args-spec args-spec
                    :ret-spec ret-spec}
-             (when args {:ret-val ret-val})))))
+             (when args {:ret-val ret-val})
+             (when (or (nil? ret) ret-fn? (= ret-expected ret-val))
+               {:exact? true})))))
 
 (defn match [sym+spec args ret opts]
   (if-not args
