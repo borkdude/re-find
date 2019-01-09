@@ -16,22 +16,26 @@
    ["-r" "--ret RETVAL" "return value"]
    ["-e" "--exact-ret-match" "return value must match on value"]
    ["-s" "--safe" "safe: no evaluation of functions on given arguments"]
-   ["-v" "--verbose" "prints table with return values"]])
+   ["-v" "--verbose" "prints table with return values"]
+   ["-p" "--permutations" "try with permutations on args"]
+   ["-f" "--finitize" "prevent evaluation of infinite collections"]])
 
 (defn -main [& args]
   (let [options (:options (parse-opts args cli-options))
         args (when-let [[_ v] (find options :args)]
                (read-args v))
-        ret-vals (find options :ret-vals)
         ret (when-let [[_ v] (find options :ret)]
               [:ret (read-ret v)])
         exact-ret-match? (:exact-ret-match options)
         safe? (:safe options)
+        permutations? (:permutations options)
+        finitize? (:finitize options)
         search-opts (cond-> {:exact-ret-match? exact-ret-match?
                              :safe? safe?}
                       args (assoc :args args)
                       ret (assoc :ret (second ret))
-                      ret-vals (assoc :ret-vals? (second ret-vals)))
+                      permutations? (assoc :permutations? permutations?)
+                      finitize? (assoc :finitize? finitize?))
         search-results (apply match (mapcat identity search-opts))]
     (if (:verbose options)
       (pprint/print-table

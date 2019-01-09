@@ -20,8 +20,10 @@ CLI options:
   [["-a" "--args ARGUMENTS" "arguments"]
    ["-r" "--ret RETVAL" "return value"]
    ["-e" "--exact-ret-match" "return value must match on value"]
-   ["-s" "--safe" "safe: no eval will happen on arguments"]
-   ["-v" "--verbose" "prints table with return values"]])
+   ["-s" "--safe" "safe: no evaluation of functions on given arguments"]
+   ["-v" "--verbose" "prints table with return values"]
+   ["-p" "--permutations" "try with permutations on args"]
+   ["-f" "--finitize" "protect evaluation of infinite collections"]])
 ```
 
 These options are best explained with examples.
@@ -38,14 +40,28 @@ Which functions accept `inc [1 2 3]` as arguments and return exactly `[2 3 4]`?
 ``` shell
 $ clj -Aspeculative --args 'inc [1 2 3]' -r '[2 3 4]' -e -v
 
-|         function |   arguments | return value |
-|------------------+-------------+--------------|
-| clojure.core/map | inc [1 2 3] |      (2 3 4) |
+|          function |   arguments | return value |
+|-------------------+-------------+--------------|
+| clojure.core/keep | inc [1 2 3] |      (2 3 4) |
+|  clojure.core/map | inc [1 2 3] |      (2 3 4) |
 ```
 
-Of course, that's `map` (a spec for `mapv` isn't currently in speculative).
+Of course, `map` and `keep`!
 
-Without the `-e` option the return value doesn't only has to satisfy the `:ret` spec and is checked independent from the arguments. In the following example,
+What if we got the order of the arguments wrong? This is what the
+`--permutations` option is for:
+
+``` shell
+$ clj -Aspeculative --args '[1 2 3] inc' -r '[2 3 4]' -e -v -p
+
+|          function |   arguments | return value |
+|-------------------+-------------+--------------|
+| clojure.core/keep | [1 2 3] inc |      (2 3 4) |
+|  clojure.core/map | [1 2 3] inc |      (2 3 4) |
+```
+
+Without the `-e` option the return value doesn't only has to satisfy the `:ret`
+spec and is checked independent from the arguments. In the following example,
 since `4` matches `any?`, both `/` and `some?` match:
 
 ``` shell
@@ -117,6 +133,25 @@ evaluate with the given arguments.
 $ clj -Aspeculative --args 'nil' --ret 'nil' -e --safe
 Assert failed: exact-ret-match? is true or ret is fn? but safe? is set to true
 ```
+
+To prevent evaluation of infinite collections, use the `--finitize` option:
+
+``` shell
+$ clj -Aspeculative --args '' -r '#(every? number? %)' -v -p -f
+
+|           function | arguments |              return value |
+|--------------------+-----------+---------------------------|
+|  clojure.core/list |           |                        () |
+| clojure.core/range |           | (0 1 2 3 4 5 6 7 8 9 ...) |
+|  clojure.core/into |           |                        [] |
+|   clojure.core/str |           |                        "" |
+|  clojure.core/conj |           |                        [] |
+|  clojure.set/union |           |                       #{} |
+```
+
+Without the `-p` option, the above example would never terminate, because
+`(range)` returns an infinite collection and the return predicate runs over it
+with `every?`.
 
 ## Name
 
