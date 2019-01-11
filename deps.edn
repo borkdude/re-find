@@ -1,6 +1,7 @@
 {:deps {org.clojure/tools.cli {:mvn/version "0.4.1"}
         org.clojure/math.combinatorics {:mvn/version "0.1.4"}}
- :aliases {:test {:extra-deps {speculative {:mvn/version "0.0.3-SNAPSHOT"}
+ :aliases {:test {:extra-deps {speculative {:git/url "https://github.com/borkdude/speculative"
+                                            :sha "d16ae7cd887bd5ea9dcb663647b0ca04ec35a348"}
                                org.clojure/clojurescript {:mvn/version "1.10.439"}
                                org.clojure/test.check {:mvn/version "RELEASE"}}
                   :extra-paths ["test"]
@@ -8,7 +9,8 @@
            :test-clj  {:main-opts ["-m" "re-find.test-runner"]}
            :test-cljs {:main-opts ["-m" "cljs.main" "-t" "node" "-c" "re-find.test-runner" "-d" "-out"]}
            :speculative
-           {:extra-deps {speculative {:mvn/version "0.0.3-SNAPSHOT"}}
+           {:extra-deps {speculative {:git/url "https://github.com/borkdude/speculative"
+                                      :sha "d16ae7cd887bd5ea9dcb663647b0ca04ec35a348"}}
             :main-opts ["-e" "(require,'[patch.clj-2443])"
                         "-e" "(require,'[speculative.instrument,:refer,[instrument]])"
                         "-m" "re-find.cli"]}}}
