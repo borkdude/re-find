@@ -68,6 +68,13 @@
                        :permutations? true)
                 {:sym (core-sym "re-find")})))
 
+(deftest finitize-test
+  (testing "this test terminates within reasonable time"
+    (is (doall
+         (match :args []
+                :ret #(every? number? %)
+                :finitize? true)))))
+
 (deftest no-args-test
   (println "no args test")
   (let [results (match :ret "foo")]
