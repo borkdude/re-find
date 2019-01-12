@@ -76,7 +76,17 @@
                 :finitize? true))))
   (testing "return values are realized to prevent exceptions leaking"
     (is (match :args [[:a :b :c] [1 2 3]]
-               :finitize? true))))
+               :finitize? true)))
+  (testing "finitized arg matches finitized result"
+    (let [results (match :args [(range)]
+                         :ret (range)
+                         :exact-ret-match? true
+                         :finitize? true)]
+      (are [x] (matches? results x)
+        {:sym (core-sym "seq")}
+        {:sym (core-sym "into")}
+        {:sym (core-sym "conj")}
+        {:sym (core-sym "flatten")}))))
 
 (deftest no-args-test
   (println "no args test")
