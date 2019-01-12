@@ -73,7 +73,10 @@
     (is (doall
          (match :args []
                 :ret #(every? number? %)
-                :finitize? true)))))
+                :finitize? true))))
+  (testing "return values are realized to prevent exceptions leaking"
+    (is (match :args [[:a :b :c] [1 2 3]]
+               :finitize? true))))
 
 (deftest no-args-test
   (println "no args test")

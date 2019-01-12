@@ -1,6 +1,7 @@
 (ns re-find.finitize)
 
 (defprotocol Finitize
+  "Limits and realizes a possibly infinite sequence"
   (finitize [x]))
 
 (def take-max 100)
