@@ -22,8 +22,8 @@ CLI options:
    ["-e" "--exact-ret-match" "return value must match on value"]
    ["-s" "--safe" "safe: no evaluation of functions on given arguments"]
    ["-v" "--verbose" "prints table with return values"]
-   ["-p" "--permutations" "try with permutations on args"]
-   ["-f" "--finitize" "protect evaluation of infinite collections"]])
+   ["-p" "--permutations" "try with permutations of args"]
+   ["-f" "--finitize" "prevent evaluation of infinite collections"]])
 ```
 
 These options are best explained with examples.
