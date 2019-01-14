@@ -57,6 +57,15 @@
                         #"exact-ret-match\? is true or ret is fn\? but safe\? is set to true"
                         (match :args [8] :ret number? :safe? true))))
 
+(deftest no-args-test
+  (println "no args test")
+  (let [results (match :ret "foo")]
+    (are [x] (matches? results x)
+      {:sym (core-sym "str")}
+      {:sym (core-sym "subs")}
+      {:sym (core-sym "re-find")}
+      {:sym (core-sym "re-matches")})))
+
 (deftest permutations-test
   (is (empty? (match :args [">>> foo <<<" #"foo"]
                      :ret "foo"
@@ -88,14 +97,12 @@
         {:sym (core-sym "conj")}
         {:sym (core-sym "flatten")}))))
 
-(deftest no-args-test
-  (println "no args test")
-  (let [results (match :ret "foo")]
+(deftest splice-last-arg-test
+  (let [results (match :args [{:a 1} [:b 2]]
+                       :splice-last-arg? true)]
     (are [x] (matches? results x)
-      {:sym (core-sym "str")}
-      {:sym (core-sym "subs")}
-      {:sym (core-sym "re-find")}
-      {:sym (core-sym "re-matches")})))
+      {:sym (core-sym "conj")}
+      {:sym (core-sym "assoc")})))
 
 ;;;; Scratch
 

@@ -99,6 +99,12 @@
              (when (or (nil? ret) ret-fn? (= ret-expected ret-val))
                {:exact? true})))))
 
+(defn splice-last-arg [args]
+  (let [l (last args)]
+    (if (seqable? l)
+      [args (into (vec (butlast args)) l)]
+      [args])))
+
 (defn match [sym+spec args ret opts]
   (if-not args
     [(match-1 sym+spec args ret opts)]
@@ -108,8 +114,17 @@
           printable-args (or (:printable-args opts)
                              (mapv pr-str (second args)))
           permutations? (:permutations? opts)
-          args-permutations (if permutations? (permutations (second args)) [(second args)])
-          printable-args-permutations (if permutations? (permutations printable-args) [printable-args])]
+          splice-last-arg? (:splice-last-arg? opts)
+          args-permutations (if permutations?
+                              (permutations (second args)) [(second args)])
+          args-permutations (if splice-last-arg?
+                              (mapcat splice-last-arg args-permutations)
+                              args-permutations)
+          printable-args-permutations
+          (if permutations? (permutations printable-args) [printable-args])
+          printable-args-permutations
+          (if splice-last-arg? (mapcat splice-last-arg printable-args-permutations)
+                                          printable-args-permutations)]
       (map #(match-1 sym+spec [:args %1] ret (assoc opts
                                             :printable-args %2
                                             :permutation? %3))
