@@ -109,13 +109,19 @@
          printable-args)))
 
 (defn splice-last-arg [{:keys [:args :printable-args] :as m}]
-  (let [l (last args)]
+  (let [l (last args)
+        lp (last printable-args)]
     (if (and (some? l) (seqable? l))
-      (let [new-args (into (vec (butlast args)) l)
-            ;; we use the evaluated last arg, because we do not want to display
-            ;; list 1 2 3 instead of 1 2 3 when the printable arg is (list 1 2
-            ;; 3)
-            new-printable-args (into (vec (butlast printable-args)) l)]
+      (let [printable-literal?
+            (cond (list? lp) ;; compare to evaluated version
+                  (= lp l)
+                  :else (= (type lp) (type l)))
+            new-args (into (vec (butlast args)) l)
+            ;; we use the evaluated last arg if it's not a literal, because we
+            ;; do not want to display list 1 2 3 instead of 1 2 3 when the
+            ;; printable arg is (list 1 2 3)
+            new-printable-args (into (vec (butlast printable-args))
+                                     (if printable-literal? lp l))]
         [m {:args new-args
             :printable-args new-printable-args}])
       [m])))
@@ -141,6 +147,6 @@
                                 args-and-printables)]
       (map #(match-1 sym+spec [:args (:args %1)] ret (assoc opts
                                                             :printable-args (:printable-args %1)
-                                            :permutation? %2))
+                                                            :permutation? %2))
            args-and-printables
            (cons false (repeat true))))))
