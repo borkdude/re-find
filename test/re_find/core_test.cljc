@@ -58,7 +58,6 @@
                         (match :args [8] :ret number? :safe? true))))
 
 (deftest no-args-test
-  (println "no args test")
   (let [results (match :ret "foo")]
     (are [x] (matches? results x)
       {:sym (core-sym "str")}
