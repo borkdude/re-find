@@ -100,18 +100,19 @@
                {:exact? true})))))
 
 (defn permutations* [{:keys [:args :printable-args]}]
-  (let [args (permutations args)
-        printable-args (permutations printable-args)]
+  (let [args* (rest (permutations args))
+        printable-args* (rest (permutations printable-args))]
     (map (fn [a pa]
            {:args a
-            :printable-args pa})
-         args
-         printable-args)))
+            :printable-args pa
+            :permutation? true})
+         args*
+         printable-args*)))
 
 (defn splice-last-arg [{:keys [:args :printable-args] :as m}]
   (let [l (last args)
         lp (last printable-args)]
-    (if (and (some? l) (seqable? l))
+    (if (and (some? l) (sequential? l))
       (let [printable-literal?
             (cond (list? lp) ;; compare to evaluated version
                   (= lp l)
@@ -122,9 +123,9 @@
             ;; printable arg is (list 1 2 3)
             new-printable-args (into (vec (butlast printable-args))
                                      (if printable-literal? lp l))]
-        [m {:args new-args
-            :printable-args new-printable-args}])
-      [m])))
+        [{:args new-args
+          :printable-args new-printable-args}])
+      [])))
 
 (defn match [sym+spec args ret opts]
   (if-not args
@@ -138,15 +139,13 @@
           permutations? (:permutations? opts)
           splice-last-arg? (:splice-last-arg? opts)
           ;; add permutations
-          args-and-printables (if permutations?
-                                (permutations* args-and-printable)
-                                [args-and-printable])
+          permutated (when permutations?
+                       (permutations* args-and-printable))
           ;; add spliced
-          args-and-printables (if splice-last-arg?
-                                (mapcat splice-last-arg args-and-printables)
-                                args-and-printables)]
-      (map #(match-1 sym+spec [:args (:args %1)] ret (assoc opts
-                                                            :printable-args (:printable-args %1)
-                                                            :permutation? %2))
-           args-and-printables
-           (cons false (repeat true))))))
+          spliced (when splice-last-arg?
+                    (mapcat splice-last-arg (cons args-and-printable permutated)))]
+      (map #(match-1 sym+spec [:args (:args %)] ret
+                     (assoc opts
+                            :printable-args (:printable-args %)
+                            :permutation? (:permutation? %)))
+           (cons args-and-printable (concat permutated spliced))))))
