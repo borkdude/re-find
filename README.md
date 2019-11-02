@@ -9,7 +9,7 @@ examples.
 
 This utility comes with a programmatic and CLI interface. For the programmatic
 interface see the docstring of `re-find.core/match`.
-The web version is hosted at [re-find.it](https://re-find.it).
+The web version is hosted [here](https://borkdude.github.io/re-find.web/).
 
 ### CLI
 
